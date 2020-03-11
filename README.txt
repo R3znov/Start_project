@@ -1,0 +1,1 @@
+Para iniciar ir a la terminal, y en el cd del proyecto poner "gulp watch"

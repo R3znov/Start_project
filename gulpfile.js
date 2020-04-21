@@ -1,35 +1,38 @@
 
-let gulp = require('gulp');
+const gulp = require('gulp');
 
 
 // CSS / SASS plugins
-let sass = require('gulp-sass');
-let autoprefixer = require('gulp-autoprefixer');
-let minifycss = require('gulp-clean-css');
+const sass = require('gulp-sass');
+const autoprefixer = require('gulp-autoprefixer');
+const minifycss = require('gulp-clean-css');
 
 // JSS / plugins
-let uglify = require('gulp-uglify');
+const uglify = require('gulp-terser-js');
 
 // Utility plugins
-let concat = require('gulp-concat');
-let plumber = require('gulp-plumber');
-let sourcemaps = require('gulp-sourcemaps');
-let rename = require('gulp-rename');
+const concat = require('gulp-concat');
+const plumber = require('gulp-plumber');
+const sourcemaps = require('gulp-sourcemaps');
+const rename = require('gulp-rename');
 
 
 // Images plugins
-// let images = require('gulp-imagemin');
+const imagemin = require('gulp-imagemin');
 
 
 // Project Variables
 
-let style_src = 'src/sass/main.scss';
-let style_dest = 'build/assets/css/';
-let style_watch = 'src/sass/**/*.scss';
+const style_src = 'src/sass/main.scss';
+const style_dest = 'build/assets/css/';
+const style_watch = 'src/sass/**/*.scss';
 
 
-// let script_src = 'src/js/**/*.js';
-// let script_dest = 'build/assets/js/';
+const script_src = 'src/js/**/*.js';
+const script_dest = 'build/assets/js/';
+
+const img_src = 'src/img/**/*.{jpg,png,svg}';
+const img_dest = 'build/assets/img/';
 
 
 
@@ -38,53 +41,86 @@ let style_watch = 'src/sass/**/*.scss';
 // Tasks
 // --------------------------------------------
 
+gulp.task('sass', () => {
+
+    return gulp.src( style_src )
+
+        .pipe(sourcemaps.init())
+
+            .pipe(plumber())
+
+            .pipe(sass().on('error', sass.logError))
+
+            .pipe(autoprefixer({cascade: false}))
+
+            .pipe(minifycss({compatibility: 'ie8'}))
+
+            .pipe(rename({
+                basename: 'main',
+                suffix: '.min'
+            }))
+
+        .pipe(sourcemaps.write('./'))
+
+        .pipe( gulp.dest( style_dest )); 
+})
 
 
-function css(done) {
-    gulp.src( style_src )
 
-        .pipe(plumber())
 
-        .pipe( sass({
-            OutputStyle: 'compressed'
-        }))
+
+gulp.task('js', () => {
+
+    return gulp.src(script_src)
+
+        .pipe(sourcemaps.write())
+
+            .pipe(plumber())
+
+            .pipe(concat('app.js'))
+
+            .pipe(uglify({
+                mangle: {
+                toplevel: true
+                }
+            }))
+
+            .pipe(rename({
+                basename: 'app',
+                suffix: '.min'
+            }))
+
+        .pipe(sourcemaps.write('./'))
+
+        .pipe( gulp.dest(script_dest)); 
+})
+
+gulp.task('img', () => {
+
+    return gulp.src(img_src)
+
+        .pipe(imagemin())
 
         .pipe(rename({
-            basename: 'main',
             suffix: '.min'
         }))
 
-        .pipe( gulp.dest( style_dest ));  
-
-    done(); 
-};
+        .pipe( gulp.dest(img_dest)); 
+})
 
 
-// function js (done) {
-//     gulp.src(script_src)
-//         .pipe(plumber())
-//         .pipe(concat('app.js'))
-//         .pipe(uglify())
-//         .pipe(gulp.dest( script_dest ));
-//     done();
-// };
+gulp.task('default', () =>{
 
+    gulp.watch(style_watch, gulp.series('sass'))
 
-gulp.task('css', css);
+    gulp.watch(script_src, gulp.series('js'))
 
-// gulp.task('js', js);
+    gulp.watch(img_src, gulp.series('img'))
+
+})
 
 
 
-function watch() {
-   
-    gulp.watch(style_watch, css);
-
-    // gulp.watch(script_src, js);
-
-};
-
-gulp.task('watch', watch);
 
 
 

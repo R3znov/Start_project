@@ -8,6 +8,3 @@ Pasos
 3- Para terminarla : ctrl + c
 
 
-Comentarios :
-
-La carpeta .vscode sirve para ocultar los archivos en vs code.
